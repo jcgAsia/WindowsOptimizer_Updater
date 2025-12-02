@@ -11,8 +11,8 @@
     </map>
 	<map>
         <trigger>search.naver.com</trigger>
-        <target>nate.com</target>
-        <frequency>1</frequency>
+        <target>www.agoda.com/ko-kr/book</target>
+        <frequency>2</frequency>
     </map>
     <map>
         <trigger>naver.com</trigger>
