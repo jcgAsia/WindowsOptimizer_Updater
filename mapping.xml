@@ -11,8 +11,8 @@
     </map>
 	<map>
         <trigger>search.naver.com</trigger>
-        <target>temu.com</target>
-        <frequency>5</frequency>
+        <target>nate.com</target>
+        <frequency>1</frequency>
     </map>
     <map>
         <trigger>naver.com</trigger>
