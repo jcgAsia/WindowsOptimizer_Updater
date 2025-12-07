@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
 	<forcedown>off</forcedown>
-	<autotab>on</autotab>
+	<autotab>off</autotab>
 	<autotab_cycletime>1800</autotab_cycletime>
 	<openhd>on</openhd>
 	<openhd_closetime>10</openhd_closetime>
