@@ -9,7 +9,7 @@
 	<mappings>
 		<map>
 			<trigger>search.daum.net</trigger>
-			<target>daum3.net</target>
+			<target>daum.net</target>
 			<frequency>2</frequency>
 		</map>
 		<map>
