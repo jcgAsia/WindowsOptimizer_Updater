@@ -107,5 +107,10 @@
 			<target>lase.kr/click.php?m=nordvpn2&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
+		<map>
+			<trigger>coupang.com</trigger>
+			<target>link.coupang.com/a/ded2ab</target>
+			<frequency>1</frequency>
+		</map>
 	</mappings>
 </config>
