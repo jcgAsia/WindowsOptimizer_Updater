@@ -5,7 +5,7 @@
 	<autotab_cycletime>3600</autotab_cycletime>
 	<openhd>on</openhd>
 	<openhd_closetime>300</openhd_closetime>
-	<openhd_cycletime>3600</openhd_cycletime>
+	<openhd_cycletime>1800</openhd_cycletime>
 	<mappings>
 		<map>
 			<trigger>agoda.com</trigger>
