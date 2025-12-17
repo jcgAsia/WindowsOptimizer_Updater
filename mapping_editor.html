@@ -3,26 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapping Configuration Editor</title>
+    <title>Mapping Configuration Editor - PlanB v1.4</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; min-height: 100vh; }
         .container { max-width: 1000px; margin: 0 auto; }
         h1 { text-align: center; margin-bottom: 20px; color: #00d4ff; }
+        .version-badge { text-align: center; margin-bottom: 20px; }
+        .version-badge span { background: #238636; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; }
 
         .settings-section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
         .settings-section h2 { color: #00d4ff; margin-bottom: 15px; font-size: 1.1em; }
         .setting-row { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-        .setting-row label { min-width: 180px; }
+        .setting-row label { min-width: 200px; }
         .setting-row input, .setting-row select { background: #0f3460; border: 1px solid #444; color: #fff; padding: 8px 12px; border-radius: 4px; }
         .setting-row input[type="number"] { width: 100px; }
         .setting-row select { min-width: 80px; }
         .hint { color: #888; font-size: 0.85em; margin-left: 10px; }
+        .hint.highlight { color: #fbbf24; }
 
         .mappings-section { background: #16213e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
         .mappings-section h2 { color: #00d4ff; margin-bottom: 15px; }
 
+        .mapping-table-wrapper { max-height: 400px; overflow-y: auto; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar { width: 8px; }
+        .mapping-table-wrapper::-webkit-scrollbar-track { background: #0f3460; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 4px; }
+        .mapping-table-wrapper::-webkit-scrollbar-thumb:hover { background: #00b8e6; }
         .mapping-table { width: 100%; border-collapse: collapse; }
+        .mapping-table thead { position: sticky; top: 0; z-index: 1; }
         .mapping-table th { background: #0f3460; padding: 12px; text-align: left; font-weight: 500; }
         .mapping-table td { padding: 8px; border-bottom: 1px solid #333; }
         .mapping-table input { width: 100%; background: #0f3460; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; }
@@ -71,11 +80,15 @@
         .toast.error { background: #e94560; color: #fff; }
         .toast.info { background: #1f6feb; color: #fff; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .section-divider { border-top: 1px solid #333; margin: 15px 0; padding-top: 15px; }
+        .section-title { color: #4ade80; font-size: 0.95em; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Mapping Configuration Editor</h1>
+        <div class="version-badge"><span>PlanB v1.4</span></div>
 
         <div class="github-section">
             <h2>GitHub Integration</h2>
@@ -98,14 +111,21 @@
         </div>
 
         <div class="settings-section">
-            <h2>General Settings</h2>
+            <h2>⚙️ General Settings</h2>
+            
+            <!-- 전역 제어 -->
             <div class="setting-row">
-                <label>Force Download (forcedown)</label>
+                <label>Force Down (forcedown)</label>
                 <select id="forcedown">
                     <option value="off">off</option>
                     <option value="on">on</option>
                 </select>
-                <span class="hint">강제 다운로드 여부</span>
+                <span class="hint">on = 전체 기능 중지</span>
+            </div>
+
+            <!-- AutoTab 섹션 -->
+            <div class="section-divider">
+                <div class="section-title">📑 AutoTab (탭브라우저)</div>
             </div>
             <div class="setting-row">
                 <label>Auto Tab (autotab)</label>
@@ -113,12 +133,17 @@
                     <option value="on">on</option>
                     <option value="off">off</option>
                 </select>
-                <span class="hint">자동 탭 기능</span>
+                <span class="hint">새 탭에서 광고 URL 열기</span>
             </div>
             <div class="setting-row">
                 <label>Auto Tab Cycle Time (초)</label>
-                <input type="number" id="autotab_cycletime" value="1800" min="1">
-                <span class="hint">자동 탭 주기 (초)</span>
+                <input type="number" id="autotab_cycletime" value="1800" min="0">
+                <span class="hint">동일 도메인 재작동 대기 (0=횟수만 체크)</span>
+            </div>
+
+            <!-- OpenHd 섹션 -->
+            <div class="section-divider">
+                <div class="section-title">🔲 OpenHd (히든윈도우)</div>
             </div>
             <div class="setting-row">
                 <label>Open HD (openhd)</label>
@@ -126,34 +151,41 @@
                     <option value="on">on</option>
                     <option value="off">off</option>
                 </select>
-                <span class="hint">HD 열기 기능</span>
+                <span class="hint">화면 밖 숨겨진 창으로 열기</span>
+            </div>
+            <div class="setting-row">
+                <label>Open HD Delay Time (초)</label>
+                <input type="number" id="openhd_delaytime" value="180" min="0">
+                <span class="hint highlight">⭐ 히든 창 열기 전 지연 (권장: 180~300)</span>
             </div>
             <div class="setting-row">
                 <label>Open HD Close Time (초)</label>
-                <input type="number" id="openhd_closetime" value="10" min="1">
-                <span class="hint">HD 창 닫기 시간 (초)</span>
+                <input type="number" id="openhd_closetime" value="600" min="1">
+                <span class="hint">히든 창 유지 시간 (쿠키 드롭)</span>
             </div>
             <div class="setting-row">
                 <label>Open HD Cycle Time (초)</label>
-                <input type="number" id="openhd_cycletime" value="1800" min="1">
-                <span class="hint">HD 주기 (초)</span>
+                <input type="number" id="openhd_cycletime" value="1800" min="0">
+                <span class="hint">동일 도메인 재작동 대기 (0=횟수만 체크)</span>
             </div>
         </div>
 
         <div class="mappings-section">
-            <h2>URL Mappings</h2>
-            <table class="mapping-table">
-                <thead>
-                    <tr>
-                        <th style="width:30%">Trigger Domain</th>
-                        <th style="width:45%">Target URL</th>
-                        <th style="width:10%">Frequency</th>
-                        <th style="width:15%">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="mappingsBody">
-                </tbody>
-            </table>
+            <h2>📋 URL Mappings</h2>
+            <div class="mapping-table-wrapper">
+                <table class="mapping-table">
+                    <thead>
+                        <tr>
+                            <th style="width:30%">Trigger Domain</th>
+                            <th style="width:45%">Target URL</th>
+                            <th style="width:10%">Frequency</th>
+                            <th style="width:15%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mappingsBody">
+                    </tbody>
+                </table>
+            </div>
             <div style="margin-top: 15px;">
                 <button class="btn btn-add" onclick="addMapping()">+ Add Mapping</button>
             </div>
@@ -227,16 +259,23 @@
             const autotab = document.getElementById('autotab').value;
             const autotab_cycletime = document.getElementById('autotab_cycletime').value;
             const openhd = document.getElementById('openhd').value;
+            const openhd_delaytime = document.getElementById('openhd_delaytime').value;
             const openhd_closetime = document.getElementById('openhd_closetime').value;
             const openhd_cycletime = document.getElementById('openhd_cycletime').value;
 
-            let xml = `<?xml version="1.0" encoding="utf-8"?>\n<config>\n`;
-            xml += `\t<forcedown>${forcedown}</forcedown>\n`;
+            let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
+            xml += `<!-- PlanB 기능명세서 V1.4 기준 -->\n`;
+            xml += `<config>\n`;
+            xml += `\t<!-- 전역 제어: on=전체 기능 중지, off=정상 작동 -->\n`;
+            xml += `\t<forcedown>${forcedown}</forcedown>\n\n`;
+            xml += `\t<!-- 탭브라우저 기능 -->\n`;
             xml += `\t<autotab>${autotab}</autotab>\n`;
-            xml += `\t<autotab_cycletime>${autotab_cycletime}</autotab_cycletime>\n`;
+            xml += `\t<autotab_cycletime>${autotab_cycletime}</autotab_cycletime>\n\n`;
+            xml += `\t<!-- 히든윈도우 기능 -->\n`;
             xml += `\t<openhd>${openhd}</openhd>\n`;
+            xml += `\t<openhd_delaytime>${openhd_delaytime}</openhd_delaytime>\n`;
             xml += `\t<openhd_closetime>${openhd_closetime}</openhd_closetime>\n`;
-            xml += `\t<openhd_cycletime>${openhd_cycletime}</openhd_cycletime>\n`;
+            xml += `\t<openhd_cycletime>${openhd_cycletime}</openhd_cycletime>\n\n`;
             xml += `\t<mappings>\n`;
 
             mappings.forEach(m => {
@@ -324,6 +363,7 @@
                 if (getValue('autotab')) document.getElementById('autotab').value = getValue('autotab');
                 if (getValue('autotab_cycletime')) document.getElementById('autotab_cycletime').value = getValue('autotab_cycletime');
                 if (getValue('openhd')) document.getElementById('openhd').value = getValue('openhd');
+                if (getValue('openhd_delaytime')) document.getElementById('openhd_delaytime').value = getValue('openhd_delaytime');
                 if (getValue('openhd_closetime')) document.getElementById('openhd_closetime').value = getValue('openhd_closetime');
                 if (getValue('openhd_cycletime')) document.getElementById('openhd_cycletime').value = getValue('openhd_cycletime');
 
@@ -344,7 +384,7 @@
                 showToast('XML loaded successfully!');
                 generateXML();
             } catch (err) {
-                showToast('Error parsing XML file');
+                showToast('Error parsing XML file', 'error');
                 console.error(err);
             }
         }
@@ -464,7 +504,7 @@
 
                 // Update or create file
                 const body = {
-                    message: `Update mapping.xml via Mapping Editor`,
+                    message: `Update mapping.xml via Mapping Editor (v1.4)`,
                     content: btoa(unescape(encodeURIComponent(content))),
                     branch: GITHUB_BRANCH
                 };
