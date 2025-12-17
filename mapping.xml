@@ -10,7 +10,7 @@
 
 	<!-- 히든윈도우 기능 -->
 	<openhd>on</openhd>
-	<openhd_delaytime>180</openhd_delaytime>
+	<openhd_delaytime>190</openhd_delaytime>
 	<openhd_closetime>300</openhd_closetime>
 	<openhd_cycletime>1800</openhd_cycletime>
 
