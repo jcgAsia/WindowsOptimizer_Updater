@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- PlanB 기능명세서 V1.4 기준 -->
 <config>
+	<!-- 전역 제어: on=전체 기능 중지, off=정상 작동 -->
 	<forcedown>off</forcedown>
+
+	<!-- 탭브라우저 기능 -->
 	<autotab>on</autotab>
 	<autotab_cycletime>3600</autotab_cycletime>
+
+	<!-- 히든윈도우 기능 -->
 	<openhd>on</openhd>
+	<openhd_delaytime>180</openhd_delaytime>
 	<openhd_closetime>300</openhd_closetime>
 	<openhd_cycletime>1800</openhd_cycletime>
+
 	<mappings>
 		<map>
 			<trigger>agoda.com</trigger>
