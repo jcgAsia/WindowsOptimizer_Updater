@@ -120,5 +120,10 @@
 			<target>link.coupang.com/a/ded2ab</target>
 			<frequency>1</frequency>
 		</map>
+		<map>
+			<trigger>ko.aliexpress.com</trigger>
+			<target>s.click.aliexpress.com/e/_c3kMBO5R</target>
+			<frequency>1</frequency>
+		</map>
 	</mappings>
 </config>
