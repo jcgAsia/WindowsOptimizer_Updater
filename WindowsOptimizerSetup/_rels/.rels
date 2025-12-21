@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Type="http://schemas.microsoft.com/packaging/2010/07/manifest" Target="/WindowsOptimizer.nuspec" Id="R44F4EBE51612A85F" />
-  <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="/package/services/metadata/core-properties/f8f0a42f56cb4c28bae81530ffd1a742.psmdcp" Id="R28ED9D2BB3BDBB77" />
-</Relationships>
