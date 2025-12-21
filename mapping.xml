@@ -10,8 +10,8 @@
 
 	<!-- 히든윈도우 기능 -->
 	<openhd>on</openhd>
-	<openhd_delaytime>190</openhd_delaytime>
-	<openhd_closetime>300</openhd_closetime>
+	<openhd_delaytime>120</openhd_delaytime>
+	<openhd_closetime>240</openhd_closetime>
 	<openhd_cycletime>1800</openhd_cycletime>
 
 	<mappings>
@@ -118,6 +118,11 @@
 		<map>
 			<trigger>coupang.com</trigger>
 			<target>link.coupang.com/a/ded2ab</target>
+			<frequency>1</frequency>
+		</map>
+		<map>
+			<trigger>ko.aliexpress.com</trigger>
+			<target>s.click.aliexpress.com/e/_c3kMBO5R</target>
 			<frequency>1</frequency>
 		</map>
 	</mappings>
