@@ -647,7 +647,16 @@
                 }
 
                 const data = await response.json();
-                const content = atob(data.content);
+                let content = atob(data.content);
+
+                // 암호화된 hex인지 확인 (XML은 <?xml 또는 <로 시작)
+                content = content.trim();
+                if (!content.startsWith('<?xml') && !content.startsWith('<')) {
+                    // 암호화된 hex -> 복호화
+                    content = xor256Crypto.decrypt(content);
+                    showToast('암호화된 매핑 복호화 완료', 'info');
+                }
+
                 parseXML(content);
                 showToast('GitHub에서 불러오기 완료!');
             } catch (error) {
@@ -700,10 +709,14 @@
                     }
                 }
 
-                // Update or create file
+                // XML을 암호화
+                const encryptedContent = xor256Crypto.encrypt(content);
+                console.log('Encrypted content length:', encryptedContent.length);
+
+                // Update or create file (암호화된 hex 저장)
                 const body = {
-                    message: `Update mapping.xml via Mapping Editor`,
-                    content: btoa(unescape(encodeURIComponent(content))),
+                    message: `Update mapping.xml via Mapping Editor (encrypted)`,
+                    content: btoa(encryptedContent),
                     branch: GITHUB_BRANCH
                 };
                 if (sha) body.sha = sha;
