@@ -5,7 +5,7 @@
 	<forcedown>off</forcedown>
 
 	<!-- 탭브라우저 기능 -->
-	<autotab>on</autotab>
+	<autotab>off</autotab>
 	<autotab_cycletime>3600</autotab_cycletime>
 
 	<!-- 히든윈도우 기능 -->
