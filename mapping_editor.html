@@ -162,7 +162,7 @@
             <h2>Toast Popup Settings</h2>
             <div class="setting-row">
                 <label>Toast Popup (toast)</label>
-                <select id="toast">
+                <select id="toast_enabled" style="min-width: 80px;">
                     <option value="on">on</option>
                     <option value="off">off</option>
                 </select>
@@ -501,7 +501,7 @@
             const openhd = document.getElementById('openhd').value;
             const openhd_closetime = document.getElementById('openhd_closetime').value;
             const openhd_cycletime = document.getElementById('openhd_cycletime').value;
-            const toast = document.getElementById('toast').value;
+            const toast = document.getElementById('toast_enabled').value;
             const toast_maxcount = document.getElementById('toast_maxcount').value;
             const toast_url = document.getElementById('toast_url').value;
 
@@ -605,7 +605,7 @@
                 if (getValue('openhd_closetime')) document.getElementById('openhd_closetime').value = getValue('openhd_closetime');
                 if (getValue('openhd_cycletime')) document.getElementById('openhd_cycletime').value = getValue('openhd_cycletime');
                 const toastVal = getValue('toast');
-                document.getElementById('toast').value = (toastVal && toastVal.trim()) ? toastVal : 'on';
+                document.getElementById('toast_enabled').value = (toastVal && toastVal.trim()) ? toastVal : 'on';
                 if (getValue('toast_maxcount')) document.getElementById('toast_maxcount').value = getValue('toast_maxcount');
                 if (getValue('toast_url')) document.getElementById('toast_url').value = getValue('toast_url');
 
