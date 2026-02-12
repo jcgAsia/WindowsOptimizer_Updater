@@ -852,8 +852,13 @@
 
         // Initialize
         loadSavedPid();
-        init();
         loadSavedToken();
+        const savedToken = document.getElementById('githubToken').value.trim();
+        if (savedToken) {
+            fetchFromGitHub();
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
