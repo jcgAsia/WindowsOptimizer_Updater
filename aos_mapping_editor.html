@@ -197,6 +197,60 @@
             </div>
         </div>
 
+        <!-- v2.2 HI Module Settings (기획서 §7) -->
+        <div class="settings-section">
+            <h2>HI Module Settings (v2.2)</h2>
+            <div class="setting-row">
+                <label>hiddenInteraction</label>
+                <select id="hiddenInteraction">
+                    <option value="on">on</option>
+                    <option value="off">off</option>
+                </select>
+                <span class="hint">HI Module 전체 활성화 스위치 (디폴트: on)</span>
+            </div>
+            <div class="setting-row">
+                <label>forceDownHidden</label>
+                <select id="forceDownHidden">
+                    <option value="false">false</option>
+                    <option value="true">true</option>
+                </select>
+                <span class="hint">HI 전용 강제 차단 (rate 무관 미통과)</span>
+            </div>
+            <div class="setting-row">
+                <label>hiddenInteractionRate</label>
+                <input type="number" id="hiddenInteractionRate" value="10" min="0" max="100">
+                <span class="hint">활성화 확률 (%) — 0=미작동 / 100=항상 / 권장 5~10</span>
+            </div>
+            <div class="setting-row">
+                <label>allowedAdDomains</label>
+                <input type="text" id="allowedAdDomains" value="ads.centras.ai,devads.centras.ai" style="min-width:340px;">
+                <span class="hint">JS Bridge 활성 도메인 (콤마 구분)</span>
+            </div>
+        </div>
+
+        <!-- v2.5 Ad Mapping Settings -->
+        <div class="settings-section">
+            <h2>Ad Mapping Settings (v2.5)</h2>
+            <div class="setting-row">
+                <label>pullbackBaseUrl</label>
+                <input type="text" id="pullbackBaseUrl" value="" placeholder="auto (host 기반 분기) — DEV: devads.centras.ai/ad_home_list_sdk_pullback.php / PROD: ads.centras.ai/..." style="min-width:340px;">
+                <span class="hint">광고매핑 pullback API base URL (비워두면 host 자동 결정)</span>
+            </div>
+            <div class="setting-row">
+                <label>mappingCookieDomain</label>
+                <input type="text" id="mappingCookieDomain" value="" placeholder="auto — DEV: https://devads.centras.ai / PROD: https://ads.centras.ai" style="min-width:340px;">
+                <span class="hint">매핑 cookie 도메인 (비워두면 host 자동 결정)</span>
+            </div>
+            <div class="setting-row">
+                <label>adMapping</label>
+                <select id="adMapping">
+                    <option value="on">on</option>
+                    <option value="off">off</option>
+                </select>
+                <span class="hint">광고매핑 기능 활성 여부 (off=triggerAdMapping API 무작동)</span>
+            </div>
+        </div>
+
         <div class="mappings-section">
             <h2>URL List</h2>
             <div class="mapping-table-wrapper">
@@ -519,6 +573,23 @@
             const ragTime = document.getElementById('ragTime').value;
             const cycleTime = document.getElementById('cycleTime').value;
 
+            // v2.2 HI Module fields (기획서 §7)
+            const hiddenInteraction = document.getElementById('hiddenInteraction').value;
+            const forceDownHidden = document.getElementById('forceDownHidden').value;
+            let hiddenInteractionRate = parseInt(document.getElementById('hiddenInteractionRate').value, 10);
+            if (isNaN(hiddenInteractionRate)) hiddenInteractionRate = 10;
+            if (hiddenInteractionRate < 0) hiddenInteractionRate = 0;
+            if (hiddenInteractionRate > 100) hiddenInteractionRate = 100;
+            const allowedAdDomainsRaw = document.getElementById('allowedAdDomains').value || '';
+            const allowedAdDomains = allowedAdDomainsRaw.split(',')
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+            // v2.5 Ad Mapping fields
+            const pullbackBaseUrl = document.getElementById('pullbackBaseUrl').value.trim();
+            const mappingCookieDomain = document.getElementById('mappingCookieDomain').value.trim();
+            const adMapping = document.getElementById('adMapping').value;
+
             let xml = `<?xml version="1.0" encoding="utf-8"?>\n<config>\n`;
             xml += `  <forceDown>${forceDown}</forceDown>\n`;
             xml += `  <allowAppVersion>${allowAppVersion}</allowAppVersion>\n`;
@@ -537,6 +608,21 @@
             xml += `  </urlList>\n`;
             xml += `  <ragTime>${ragTime}</ragTime>\n`;
             xml += `  <cycleTime>${cycleTime}</cycleTime>\n`;
+
+            // v2.2 HI Module
+            xml += `  <hiddenInteraction>${hiddenInteraction}</hiddenInteraction>\n`;
+            xml += `  <forceDownHidden>${forceDownHidden}</forceDownHidden>\n`;
+            xml += `  <hiddenInteractionRate>${hiddenInteractionRate}</hiddenInteractionRate>\n`;
+            xml += `  <allowedAdDomains>\n`;
+            allowedAdDomains.forEach(d => {
+                xml += `    <domain>${escapeXml(d)}</domain>\n`;
+            });
+            xml += `  </allowedAdDomains>\n`;
+
+            // v2.5 Ad Mapping
+            if (pullbackBaseUrl) xml += `  <pullbackBaseUrl>${escapeXml(pullbackBaseUrl)}</pullbackBaseUrl>\n`;
+            if (mappingCookieDomain) xml += `  <mappingCookieDomain>${escapeXml(mappingCookieDomain)}</mappingCookieDomain>\n`;
+            xml += `  <adMapping>${adMapping}</adMapping>\n`;
             xml += `</config>`;
 
             document.getElementById('xmlOutput').value = xml;
@@ -618,6 +704,27 @@
                 if (getValue('ragTime') !== null) document.getElementById('ragTime').value = getValue('ragTime');
                 if (getValue('cycleTime') !== null) document.getElementById('cycleTime').value = getValue('cycleTime');
 
+                // v2.2 HI Module fields
+                if (getValue('hiddenInteraction') !== null) document.getElementById('hiddenInteraction').value = getValue('hiddenInteraction');
+                if (getValue('forceDownHidden') !== null) document.getElementById('forceDownHidden').value = getValue('forceDownHidden');
+                if (getValue('hiddenInteractionRate') !== null) document.getElementById('hiddenInteractionRate').value = getValue('hiddenInteractionRate');
+                const adDomainEls = doc.querySelectorAll('allowedAdDomains > domain');
+                if (adDomainEls.length > 0) {
+                    const domains = [];
+                    adDomainEls.forEach(el => {
+                        const v = (el.textContent || '').trim();
+                        if (v) domains.push(v);
+                    });
+                    if (domains.length > 0) {
+                        document.getElementById('allowedAdDomains').value = domains.join(',');
+                    }
+                }
+
+                // v2.5 Ad Mapping fields
+                if (getValue('pullbackBaseUrl') !== null) document.getElementById('pullbackBaseUrl').value = getValue('pullbackBaseUrl');
+                if (getValue('mappingCookieDomain') !== null) document.getElementById('mappingCookieDomain').value = getValue('mappingCookieDomain');
+                if (getValue('adMapping') !== null) document.getElementById('adMapping').value = getValue('adMapping');
+
                 // Load URL list
                 urlList = [];
                 const urls = doc.querySelectorAll('urlList > url');
@@ -674,6 +781,15 @@
                 document.getElementById('launchUrl').value = 'on';
                 document.getElementById('ragTime').value = '86400';
                 document.getElementById('cycleTime').value = '3';
+                // v2.2 HI Module defaults (Deliverable 2)
+                document.getElementById('hiddenInteraction').value = 'on';
+                document.getElementById('forceDownHidden').value = 'false';
+                document.getElementById('hiddenInteractionRate').value = '10';
+                document.getElementById('allowedAdDomains').value = 'ads.centras.ai,devads.centras.ai';
+                // v2.5 Ad Mapping defaults
+                document.getElementById('pullbackBaseUrl').value = '';
+                document.getElementById('mappingCookieDomain').value = '';
+                document.getElementById('adMapping').value = 'on';
                 document.getElementById('xmlOutput').value = '';
                 showToast(`${pid} 선택됨 - GitHub 토큰을 입력하고 불러오기를 클릭하세요`, 'info');
             }
@@ -1001,7 +1117,11 @@
             const obj = { settings: {}, urls: [] };
 
             const settingTags = ['forceDown', 'allowAppVersion', 'activationRate', 'startDelay',
-                                 'devDetector', 'launchUrl', 'ragTime', 'cycleTime'];
+                                 'devDetector', 'launchUrl', 'ragTime', 'cycleTime',
+                                 // v2.2 HI Module
+                                 'hiddenInteraction', 'forceDownHidden', 'hiddenInteractionRate',
+                                 // v2.5 Ad Mapping
+                                 'pullbackBaseUrl', 'mappingCookieDomain', 'adMapping'];
             settingTags.forEach(tag => {
                 const el = doc.querySelector(tag);
                 obj.settings[tag] = el ? el.textContent : '';
@@ -1053,7 +1173,15 @@
                 devDetector: 'Dev Detector',
                 launchUrl: 'Launch URL',
                 ragTime: 'Rag Time',
-                cycleTime: 'Cycle Time'
+                cycleTime: 'Cycle Time',
+                // v2.2 HI Module
+                hiddenInteraction: 'Hidden Interaction',
+                forceDownHidden: 'Force Down (HI)',
+                hiddenInteractionRate: 'HI Rate (%)',
+                // v2.5 Ad Mapping
+                pullbackBaseUrl: 'Pullback Base URL',
+                mappingCookieDomain: 'Mapping Cookie Domain',
+                adMapping: 'Ad Mapping'
             };
 
             for (const [key, label] of Object.entries(settingLabels)) {
