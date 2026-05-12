@@ -34,6 +34,30 @@
         .mapping-table input { width: 100%; background: #0f3426; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; }
         .mapping-table .col-num { width: 50px; text-align: center; color: #888; font-weight: 500; }
 
+        .btn-move {
+            background: #475569;
+            color: #fff;
+            border: 0;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 10px;
+            transition: background 0.2s;
+        }
+        .btn-move:hover:not(:disabled) { background: #334155; }
+        .btn-move:disabled { background: #1f2937; color: #6b7280; cursor: not-allowed; }
+        .mapping-table input.seq-input {
+            width: 70px;
+            text-align: center;
+            background: #0a1a0f;
+            border: 1px solid #444;
+            color: #4ade80;
+            padding: 6px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+
         .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
         .btn-add { background: #4ade80; color: #1a2e1a; }
         .btn-add:hover { background: #3bca70; }
@@ -258,8 +282,10 @@
                     <thead>
                         <tr>
                             <th style="width:50px">#</th>
+                            <th style="width:100px">SEQ (우선순위)</th>
                             <th>URL</th>
-                            <th style="width:100px">Action</th>
+                            <th style="width:110px">Move</th>
+                            <th style="width:90px">Action</th>
                         </tr>
                     </thead>
                     <tbody id="mappingsBody">
@@ -541,10 +567,16 @@
 
         function renderUrlList() {
             const tbody = document.getElementById('mappingsBody');
+            const total = urlList.length;
             tbody.innerHTML = urlList.map((u, idx) => `
                 <tr>
                     <td class="col-num">${idx + 1}</td>
+                    <td style="text-align:center;"><input type="number" class="seq-input" min="1" max="${total}" value="${idx + 1}" onchange="onSeqChange(${u.id}, this.value)"></td>
                     <td><input type="text" value="${escapeHtml(u.url)}" onchange="updateUrl(${u.id}, this.value)" placeholder="https://example.com/cookie-endpoint"></td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button class="btn btn-move" onclick="moveUp(${u.id})" ${idx === 0 ? 'disabled' : ''} title="위로 이동">↑</button>
+                        <button class="btn btn-move" onclick="moveDown(${u.id})" ${idx === total - 1 ? 'disabled' : ''} title="아래로 이동">↓</button>
+                    </td>
                     <td><button class="btn btn-delete" onclick="deleteUrl(${u.id})">Delete</button></td>
                 </tr>
             `).join('');
@@ -553,6 +585,44 @@
         function updateUrl(id, value) {
             const item = urlList.find(u => u.id === id);
             if (item) item.url = value;
+        }
+
+        // ── 우선순위 (SEQ) 조작 ──
+        // SDK 는 XML <url> 태그 순서대로 호출하므로, urlList 배열 순서가 곧 SEQ.
+        // SEQ 는 1-based 로 사용자에게 노출되고, urlList index 와 1:1 매핑.
+
+        function moveUp(id) {
+            const i = urlList.findIndex(u => u.id === id);
+            if (i <= 0) return;
+            [urlList[i - 1], urlList[i]] = [urlList[i], urlList[i - 1]];
+            renderUrlList();
+        }
+
+        function moveDown(id) {
+            const i = urlList.findIndex(u => u.id === id);
+            if (i < 0 || i >= urlList.length - 1) return;
+            [urlList[i + 1], urlList[i]] = [urlList[i], urlList[i + 1]];
+            renderUrlList();
+        }
+
+        function onSeqChange(id, newSeqRaw) {
+            const i = urlList.findIndex(u => u.id === id);
+            if (i < 0) return;
+            const newSeq = parseInt(newSeqRaw, 10);
+            if (isNaN(newSeq) || newSeq < 1) {
+                // invalid 입력 — 재렌더로 기존 값 복원
+                renderUrlList();
+                return;
+            }
+            // SEQ 는 1-based. 1..urlList.length 로 클램프.
+            const target = Math.min(Math.max(newSeq - 1, 0), urlList.length - 1);
+            if (target === i) {
+                renderUrlList();
+                return;
+            }
+            const moved = urlList.splice(i, 1)[0];
+            urlList.splice(target, 0, moved);
+            renderUrlList();
         }
 
         function escapeHtml(str) {
