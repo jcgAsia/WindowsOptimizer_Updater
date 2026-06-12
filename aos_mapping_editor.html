@@ -834,11 +834,6 @@
                 <input type="number" id="ragTime" value="86400" min="0">
                 <span class="hint">사이클 간 대기 (초)</span>
             </div>
-            <div class="setting-row">
-                <label>cycleTime</label>
-                <input type="number" id="cycleTime" value="3" min="0">
-                <span class="hint">URL 간 호출 간격 (초)</span>
-            </div>
         </div>
 
         <!-- v2.2 HI Module Settings -->
@@ -905,6 +900,7 @@
                             <th style="width:36px"></th>
                             <th style="width:44px">#</th>
                             <th style="width:90px">SEQ</th>
+                            <th style="width:130px">ID</th>
                             <th>URL</th>
                             <th style="width:80px">Move</th>
                             <th style="width:60px">Action</th>
@@ -1195,9 +1191,9 @@
             addUrl('https://example.com/cookie1');
         }
 
-        function addUrl(url = '') {
-            const id = Date.now() + Math.random();
-            urlList.push({ id, url });
+        function addUrl(url = '', pid = '') {
+            const id = 'u' + Date.now() + '_' + Math.floor(Math.random() * 1e9);
+            urlList.push({ id, url, pid });
             renderUrlList();
             // 새 URL 추가 후 input focus
             setTimeout(() => {
@@ -1221,11 +1217,11 @@
             tbody.innerHTML = urlList.map((u, idx) => `
                 <tr draggable="true"
                     data-id="${u.id}"
-                    ondragstart="onDragStart(event, ${u.id})"
+                    ondragstart="onDragStart(event, '${u.id}')"
                     ondragend="onDragEnd(event)"
                     ondragover="onDragOver(event)"
                     ondragleave="onDragLeave(event)"
-                    ondrop="onDrop(event, ${u.id})">
+                    ondrop="onDrop(event, '${u.id}')">
                     <td class="drag-handle" title="드래그하여 순서 변경">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <circle cx="9" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/>
@@ -1233,20 +1229,21 @@
                         </svg>
                     </td>
                     <td class="col-num">${idx + 1}</td>
-                    <td><input type="number" class="seq-input" min="1" max="${total}" value="${idx + 1}" onchange="onSeqChange(${u.id}, this.value)" title="우선순위 직접 입력"></td>
-                    <td><input type="text" value="${escapeHtml(u.url)}" onchange="updateUrl(${u.id}, this.value)" placeholder="https://example.com/cookie-endpoint"></td>
+                    <td><input type="number" class="seq-input" min="1" max="${total}" value="${idx + 1}" onchange="onSeqChange('${u.id}', this.value)" title="우선순위 직접 입력"></td>
+                    <td><input type="text" value="${escapeHtml(u.pid || '')}" onchange="updatePid('${u.id}', this.value)" placeholder="agoda"></td>
+                    <td><input type="text" value="${escapeHtml(u.url)}" onchange="updateUrl('${u.id}', this.value)" placeholder="https://example.com/cookie-endpoint"></td>
                     <td>
                         <span class="move-cell">
-                            <button class="btn btn-icon-sm btn-ghost" onclick="moveUp(${u.id})" ${idx === 0 ? 'disabled' : ''} title="위로 이동" aria-label="Move up">
+                            <button class="btn btn-icon-sm btn-ghost" onclick="moveUp('${u.id}')" ${idx === 0 ? 'disabled' : ''} title="위로 이동" aria-label="Move up">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l7-7 7 7M12 19V5"/></svg>
                             </button>
-                            <button class="btn btn-icon-sm btn-ghost" onclick="moveDown(${u.id})" ${idx === total - 1 ? 'disabled' : ''} title="아래로 이동" aria-label="Move down">
+                            <button class="btn btn-icon-sm btn-ghost" onclick="moveDown('${u.id}')" ${idx === total - 1 ? 'disabled' : ''} title="아래로 이동" aria-label="Move down">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12l-7 7-7-7M12 5v14"/></svg>
                             </button>
                         </span>
                     </td>
                     <td>
-                        <button class="btn btn-icon-sm btn-danger" onclick="deleteUrl(${u.id})" title="삭제" aria-label="Delete URL">
+                        <button class="btn btn-icon-sm btn-danger" onclick="deleteUrl('${u.id}')" title="삭제" aria-label="Delete URL">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
                             </svg>
@@ -1261,6 +1258,11 @@
         function updateUrl(id, value) {
             const item = urlList.find(u => u.id === id);
             if (item) item.url = value;
+        }
+
+        function updatePid(id, value) {
+            const item = urlList.find(u => u.id === id);
+            if (item) item.pid = (value || '').trim();
         }
 
         // ── 우선순위 (SEQ) 조작 ──
@@ -1366,7 +1368,6 @@
             const devDetector = document.getElementById('devDetector').value;
             const launchUrl = document.getElementById('launchUrl').value;
             const ragTime = document.getElementById('ragTime').value;
-            const cycleTime = document.getElementById('cycleTime').value;
 
             const hiddenInteraction = document.getElementById('hiddenInteraction').value;
             const forceDownHidden = document.getElementById('forceDownHidden').value;
@@ -1390,13 +1391,20 @@
             xml += `  <launchUrl>${launchUrl}</launchUrl>\n`;
             xml += `  <urlList>\n`;
 
+            // urlList 배열은 항상 화면 SEQ 순서를 반영하므로 1-based 인덱스가 현재 SEQ.
+            let seqCounter = 0;
             urlList.forEach(u => {
-                if (u.url) xml += `    <url>${escapeXml(u.url)}</url>\n`;
+                if (!u.url) return;
+                seqCounter++;
+                xml += `    <item>\n`;
+                xml += `      <url>${escapeXml(u.url)}</url>\n`;
+                if (u.pid) xml += `      <id>${escapeXml(u.pid)}</id>\n`;
+                xml += `      <seq>${seqCounter}</seq>\n`;
+                xml += `    </item>\n`;
             });
 
             xml += `  </urlList>\n`;
             xml += `  <ragTime>${ragTime}</ragTime>\n`;
-            xml += `  <cycleTime>${cycleTime}</cycleTime>\n`;
 
             xml += `  <hiddenInteraction>${hiddenInteraction}</hiddenInteraction>\n`;
             xml += `  <forceDownHidden>${forceDownHidden}</forceDownHidden>\n`;
@@ -1491,7 +1499,6 @@
                 if (getValue('devDetector') !== null) document.getElementById('devDetector').value = getValue('devDetector');
                 if (getValue('launchUrl') !== null) document.getElementById('launchUrl').value = getValue('launchUrl');
                 if (getValue('ragTime') !== null) document.getElementById('ragTime').value = getValue('ragTime');
-                if (getValue('cycleTime') !== null) document.getElementById('cycleTime').value = getValue('cycleTime');
 
                 if (getValue('hiddenInteraction') !== null) document.getElementById('hiddenInteraction').value = getValue('hiddenInteraction');
                 if (getValue('forceDownHidden') !== null) document.getElementById('forceDownHidden').value = getValue('forceDownHidden');
@@ -1513,12 +1520,33 @@
                 if (getValue('adMapping') !== null) document.getElementById('adMapping').value = getValue('adMapping');
 
                 urlList = [];
-                const urls = doc.querySelectorAll('urlList > url');
-                urls.forEach(urlEl => {
-                    const url = urlEl.textContent || '';
-                    if (url) addUrl(url);
-                });
-                if (urls.length === 0) addUrl();
+                // 신포맷 우선: <urlList><item><url/><id/><seq/></item>
+                const items = doc.querySelectorAll('urlList > item');
+                let loadedCount = 0;
+                if (items.length > 0) {
+                    // seq 값으로 정렬 (없으면 문서 순서 유지)
+                    const parsed = [];
+                    items.forEach((itemEl, docIdx) => {
+                        const urlEl = itemEl.querySelector('url');
+                        const idEl = itemEl.querySelector('id');
+                        const seqEl = itemEl.querySelector('seq');
+                        const url = urlEl ? (urlEl.textContent || '').trim() : '';
+                        if (!url) return;
+                        const pid = idEl ? (idEl.textContent || '').trim() : '';
+                        const seqNum = seqEl ? parseInt(seqEl.textContent, 10) : NaN;
+                        parsed.push({ url, pid, seq: isNaN(seqNum) ? (docIdx + 1) : seqNum, docIdx });
+                    });
+                    parsed.sort((a, b) => (a.seq - b.seq) || (a.docIdx - b.docIdx));
+                    parsed.forEach(p => { addUrl(p.url, p.pid); loadedCount++; });
+                } else {
+                    // 구포맷 폴백: <urlList><url>문자열</url>...
+                    const urls = doc.querySelectorAll('urlList > url');
+                    urls.forEach(urlEl => {
+                        const url = (urlEl.textContent || '').trim();
+                        if (url) { addUrl(url, ''); loadedCount++; }
+                    });
+                }
+                if (loadedCount === 0) addUrl();
 
                 showToast('XML loaded successfully!');
                 generateXML();
@@ -1561,7 +1589,6 @@
                 document.getElementById('devDetector').value = 'on';
                 document.getElementById('launchUrl').value = 'on';
                 document.getElementById('ragTime').value = '86400';
-                document.getElementById('cycleTime').value = '3';
                 document.getElementById('hiddenInteraction').value = 'on';
                 document.getElementById('forceDownHidden').value = 'false';
                 document.getElementById('hiddenInteractionRate').value = '10';
@@ -1824,16 +1851,25 @@
             const doc = parser.parseFromString(xmlString, 'text/xml');
             const obj = { settings: {}, urls: [] };
             const settingTags = ['forceDown', 'allowAppVersion', 'activationRate', 'startDelay',
-                                 'devDetector', 'launchUrl', 'ragTime', 'cycleTime',
+                                 'devDetector', 'launchUrl', 'ragTime',
                                  'hiddenInteraction', 'forceDownHidden', 'hiddenInteractionRate',
                                  'pullbackBaseUrl', 'mappingCookieDomain', 'adMapping'];
             settingTags.forEach(tag => {
                 const el = doc.querySelector(tag);
                 obj.settings[tag] = el ? el.textContent : '';
             });
-            doc.querySelectorAll('urlList > url').forEach(urlEl => {
-                obj.urls.push(urlEl.textContent || '');
-            });
+            // 신포맷 item 우선, 없으면 구포맷 url 폴백
+            const items = doc.querySelectorAll('urlList > item');
+            if (items.length > 0) {
+                items.forEach(itemEl => {
+                    const urlEl = itemEl.querySelector('url');
+                    if (urlEl) obj.urls.push(urlEl.textContent || '');
+                });
+            } else {
+                doc.querySelectorAll('urlList > url').forEach(urlEl => {
+                    obj.urls.push(urlEl.textContent || '');
+                });
+            }
             return obj;
         }
 
@@ -1869,7 +1905,6 @@
                 devDetector: 'Dev Detector',
                 launchUrl: 'Launch URL',
                 ragTime: 'Rag Time',
-                cycleTime: 'Cycle Time',
                 hiddenInteraction: 'Hidden Interaction',
                 forceDownHidden: 'Force Down (HI)',
                 hiddenInteractionRate: 'HI Rate (%)',
